@@ -1,0 +1,7 @@
+Whyte
+Station No. 046046A
+Date/Time ddmmyyyyHHMM
+Water Level in m LAT
+Data_last_updated 12-10-2026 13:00
+121020261200 1.943
+121020261258 1.575
