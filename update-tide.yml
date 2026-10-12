@@ -1,0 +1,29 @@
+name: Update Tide Data
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch Whyte Island tide
+        run: |
+          echo "Fetching TMR Whyte_Island.txt..."
+          curl -L -A "Mozilla/5.0 (GitHub Action - Port Brisbane Tide)" "https://opendata.tmr.qld.gov.au/Whyte_Island.txt?t=$(date +%s)" -o Whyte_Island.txt
+          echo "---"
+          head -n 15 Whyte_Island.txt
+          echo "---"
+          tail -n 20 Whyte_Island.txt
+          echo "$(date -u) - $(wc -l < Whyte_Island.txt) lines" > last_updated.txt
+          ls -lh
+      - name: Commit if changed
+        run: |
+          git config user.name "tide-bot"
+          git config user.email "tide-bot@github.com"
+          git add Whyte_Island.txt last_updated.txt
+          git diff --staged --quiet || (git commit -m "Live tide $(date -u +%Y-%m-%dT%H:%M:%SZ)" && git push)
