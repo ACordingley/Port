@@ -1,0 +1,27 @@
+name: Update Tide - Force No Cache Live 14 Oct
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch LIVE no-cache
+        run: |
+          curl -L --no-progress-meter -H "Cache-Control: no-cache" -H "Pragma: no-cache" "https://opendata.tmr.qld.gov.au/Whyte_Island.txt?t=$(date +%s)&nocache=1&r=$RANDOM" -o Whyte_Island.txt
+          echo "--- HEADER ---"
+          head -n 10 Whyte_Island.txt
+          echo "--- LAST 5 LINES (should be 14 Oct 2026 10:17 = 2.069 or newer) ---"
+          tail -n 10 Whyte_Island.txt
+          echo "Lines: $(wc -l < Whyte_Island.txt)"
+      - name: Commit
+        run: |
+          git config user.name "tide-bot"
+          git config user.email "bot@github.com"
+          git add Whyte_Island.txt
+          git diff --staged --quiet || (git commit -m "Live 14 Oct $(date -u) - $(tail -1 Whyte_Island.txt)" && git push)
